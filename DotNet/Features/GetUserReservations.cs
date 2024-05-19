@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Endpoints.Features;
 
+// 2
+
 public record GetUserReservationsResponse
 {
     public required IEnumerable<ReservationDto> Reservations { get; init; }
@@ -31,7 +33,11 @@ public class GetUserReservations
                 TotalCost = r.TotalCost
             });
 
-        logger.LogInformation("Executing query: {0}", query.ToQueryString());
+        var sql = query.ToQueryString();
+
+        await File.AppendAllTextAsync("results.md", $"## {nameof(GetUserReservations)}\n\nGenerated SQL:\n\n```\n{sql}\n```\n\n", ct);
+
+        logger.LogInformation("Executing query: {0}", sql);
 
         var reservations = await query.ToListAsync(ct);
 
@@ -43,15 +49,21 @@ public class GetUserReservations
 
     public static async Task<Ok<GetUserReservationsResponse>> Raw(
         long userId,
-        [FromServices] DapperContext context)
+        [FromServices] DapperContext context,
+        [FromServices] ILogger<GetUserReservations> logger,
+        CancellationToken ct)
     {
         using var connection = context.CreateConnection();
 
-        var reservations = await connection.QueryAsync<ReservationDto>(
-            @"SELECT r.id AS Id, r.start_date AS StartDate, r.end_date AS EndDate, r.guest_number AS GuestNumber, r.total_cost AS TotalCost
+        var sql = @"SELECT r.id AS Id, r.start_date AS StartDate, r.end_date AS EndDate, r.guest_number AS GuestNumber, r.total_cost AS TotalCost
             FROM rental.reservations r
-            WHERE r.reserved_by_id = @userId;",
-            new { userId });
+            WHERE r.reserved_by_id = @userId;";
+
+        await File.AppendAllTextAsync("results.md", $"## {nameof(GetUserReservations)}\n\nRaw SQL:\n\n```\n{sql}\n```\n\n", ct);
+
+        logger.LogInformation("Executing query: {0}", sql);
+
+        var reservations = await connection.QueryAsync<ReservationDto>(sql, new { userId });
 
         return TypedResults.Ok(new GetUserReservationsResponse
         {   

@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Endpoints.Features;
 
+// 6
+
 public record GetUserFlatWithHighestIncomeResponse
 {
     public required long Id { get; init; }
@@ -36,7 +38,11 @@ public class GetUserFlatWithHighestIncome
             })
             .OrderByDescending(f => f.TotalRevenue);
 
-        logger.LogInformation("Executing query: {0}", query.ToQueryString());
+        var sql = query.ToQueryString();
+
+        await File.AppendAllTextAsync("results.md", $"## {nameof(GetUserFlatWithHighestIncome)}\n\nGenerated SQL:\n\n```\n{sql}\n```\n\n", ct);
+
+        logger.LogInformation("Executing query: {0}", sql);
 
         var flat = await query.FirstOrDefaultAsync(ct);
 
@@ -47,20 +53,27 @@ public class GetUserFlatWithHighestIncome
         long userId,
         DateTime startDate,
         DateTime endDate,
-        [FromServices] DapperContext context)
+        [FromServices] DapperContext context,
+        [FromServices] ILogger<GetUserFlatWithHighestIncome> logger,
+        CancellationToken ct)
     {
         using var connection = context.CreateConnection();
 
-        var flat = await connection.QueryFirstOrDefaultAsync<GetUserFlatWithHighestIncomeResponse>(
-            @"SELECT f.id AS Id, SUM(r.total_cost) AS TotalRevenue
+        var sql = @"
+            SELECT f.id AS Id, SUM(r.total_cost) AS TotalRevenue
             FROM rental.flats f
             JOIN rental.reservations r ON f.id = r.flat_id
             WHERE r.start_date >= @startDate AND r.end_date <= @endDate
             AND f.building_id IN (SELECT id FROM rental.building WHERE owner_id = @userId) 
             GROUP BY f.id
             ORDER BY TotalRevenue DESC
-            LIMIT 1;",
-            new { userId, startDate, endDate });
+            LIMIT 1;";
+        
+        await File.AppendAllTextAsync("results.md", $"## {nameof(GetUserFlatWithHighestIncome)}\n\nGenerated SQL:\n\n```\n{sql}\n```\n\n", ct);
+
+        logger.LogInformation("Executing query: {0}", sql);
+
+        var flat = await connection.QueryFirstOrDefaultAsync<GetUserFlatWithHighestIncomeResponse>(sql, new { userId, startDate, endDate });
 
         return TypedResults.Ok(flat);
     }

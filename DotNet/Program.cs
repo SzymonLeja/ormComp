@@ -21,7 +21,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<EfCoreContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("RentalDbContext")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("RentalDbContext"), x => x.UseNetTopologySuite()));
 
 builder.Services.AddScoped<DapperContext>();
 
@@ -36,7 +36,11 @@ app.UseMiddleware<RequestTimeMiddleware>();
 
 app.UseCors("CorsPolicy");
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/swagger");
+    return Task.CompletedTask;
+});
 
 app.MapGet("/api/users/{userId:long}/flats/best", GetUserFlatWithHighestIncome.Generated);
 app.MapGet("/api/users/{userId:long}/flats/best/raw", GetUserFlatWithHighestIncome.Raw);
@@ -52,5 +56,11 @@ app.MapGet("/api/flats/stats/raw", GetFlatsByCapacityAndRevenue.Raw);
 
 app.MapGet("/api/flats/query", GetFlatsByQuery.Generated);
 app.MapGet("/api/flats/query/raw", GetFlatsByQuery.Raw);
+
+app.MapGet("/api/flats/popular", GetMostPopularFlatStats.Generated);
+app.MapGet("/api/flats/popular/raw", GetMostPopularFlatStats.Raw);
+
+app.MapGet("/api/flats/search", GetFlatsNearLocation.Generated);
+app.MapGet("/api/flats/search/raw", GetFlatsNearLocation.Raw);
 
 app.Run();
