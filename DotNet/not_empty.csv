@@ -1,0 +1,117 @@
+userid;dbid;toplevel;queryid;query;plans;total_plan_time;min_plan_time;max_plan_time;mean_plan_time;stddev_plan_time;calls;total_exec_time;min_exec_time;max_exec_time;mean_exec_time;stddev_exec_time;rows;shared_blks_hit;shared_blks_read;shared_blks_dirtied;shared_blks_written;local_blks_hit;local_blks_read;local_blks_dirtied;local_blks_written;temp_blks_read;temp_blks_written;blk_read_time;blk_write_time;temp_blk_read_time;temp_blk_write_time;wal_records;wal_fpi;wal_bytes;jit_functions;jit_generation_time;jit_inlining_count;jit_inlining_time;jit_optimization_count;jit_optimization_time;jit_emission_count;jit_emission_time
+10;32871;t;-417404113517924016;"SELECT f.capacity AS Capacity, COUNT(r.id) AS NumberOfRentals, SUM(r.total_cost) AS TotalRevenue
+FROM rental.flats f
+JOIN rental.reservations r ON f.id = r.flat_id
+GROUP BY f.capacity
+ORDER BY NumberOfRentals DESC, TotalRevenue DESC";0;0;0;0;0;0;5;15141.8563;2383.451;3601.0317999999997;3028.37126;426.7474655923598;50;8757;230078;0;0;0;0;0;0;111847;112588;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+10;32871;t;-6051908327733557471;"SELECT u.id AS Id, u.first_name AS FirstName, u.last_name AS LastName
+FROM rental.users u
+JOIN rental.building b ON u.id = b.owner_id
+JOIN rental.flats f ON b.id = f.building_id
+JOIN rental.addresses a ON b.address_id = a.id
+WHERE a.city = $1
+GROUP BY u.id
+HAVING COUNT(f.id) = $2";0;0;0;0;0;0;5;2383.9814;452.6706;502.3491;476.79628;16.55137531583404;15;398;43780;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+10;32871;t;-6350233935968508531;"SELECT f.id AS ""Id"", f.description AS ""Description"", f.daily_price_per_person AS ""DailyPricePerPerson"", f.capacity AS ""Capacity"", f.building_id AS ""BuildingId"", f.flat_number AS ""FlatNumber""
+FROM rental.flats AS f
+INNER JOIN rental.building AS b ON f.building_id = b.id
+INNER JOIN rental.addresses AS a ON b.address_id = a.id
+WHERE $1 * acos(($2 * cos(($3 * a.latitude::double precision) / $4)) * cos(($5 * a.longitude::double precision) / $6 - $7) + $8 * sin(($9 * a.latitude::double precision) / $10)) < $11";0;0;0;0;0;0;5;12669.983400000001;1105.5855000000001;3536.1505;2533.99668;829.5414398523473;127965;44972;116278;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+10;32871;t;-1616123222825357101;"SELECT f.id AS Id, f.description AS Description, f.daily_price_per_person AS DailyPricePerPerson, f.capacity AS Capacity, f.building_id AS BuildingId, f.flat_number AS FlatNumber
+FROM rental.flats f
+JOIN rental.building b ON f.building_id = b.id
+JOIN rental.addresses a ON b.address_id = a.id
+WHERE (
+    $1 * acos (
+        cos(radians($2)) * cos(radians(a.latitude)) * cos(radians(a.longitude - $3)) +
+        sin(radians($4)) * sin(radians(a.latitude))
+    )
+) < $5";0;0;0;0;0;0;5;10166.2275;1015.6806;3751.9003;2033.2455;1205.7968064395757;128005;44317;116933;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+10;32871;t;2925326113394445949;"SELECT f.id AS Id, SUM(r.total_cost) AS TotalRevenue
+FROM rental.flats f
+JOIN rental.reservations r ON f.id = r.flat_id
+WHERE r.start_date >= $1 AND r.end_date <= $2
+AND f.building_id IN (SELECT id FROM rental.building WHERE owner_id = $3) 
+GROUP BY f.id
+ORDER BY TotalRevenue DESC";0;0;0;0;0;0;5;22.411700000000003;3.1932;7.953200000000001;4.482340000000001;1.8389612259098889;225;881;544;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+10;32871;t;5790089386458641856;"SELECT r.id AS Id, r.start_date AS StartDate, r.end_date AS EndDate, r.guest_number AS GuestNumber, r.total_cost AS TotalCost
+            FROM rental.reservations r
+            WHERE r.reserved_by_id = $1";0;0;0;0;0;0;10;4.7993999999999994;0.10179999999999999;1.4491;0.47994;0.43058080356653156;290;185;135;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+10;32871;t;-2639351766443624826;"SELECT u.id AS ""Id"", u.first_name AS ""FirstName"", u.last_name AS ""LastName""
+FROM rental.users AS u
+WHERE (
+    SELECT count(*)::int
+    FROM rental.building AS b
+    INNER JOIN rental.addresses AS a ON b.address_id = a.id
+    INNER JOIN rental.flats AS f ON b.id = f.building_id
+    WHERE u.id = b.owner_id AND a.city = $1) = $2";0;0;0;0;0;0;5;38345.865000000005;5712.8483;9045.9722;7669.173000000001;1255.6478334507726;15;8946672;56258;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+10;32871;t;1566226529174231237;"SELECT f.id AS ""Id"", f.description AS ""Description"", f.daily_price_per_person AS ""DailyPricePerPerson"", f.capacity AS ""Capacity"", f.building_id AS ""BuildingId"", f.flat_number AS ""FlatNumber""
+FROM rental.flats AS f
+WHERE f.daily_price_per_person <= $1 AND f.capacity >= $2 AND NOT EXISTS (
+    SELECT $3
+    FROM rental.reservations AS r
+    WHERE f.id = r.flat_id AND ((r.start_date <= $4 AND r.end_date >= $5) OR (r.start_date >= $6 AND r.start_date < $7) OR (r.end_date > $8 AND r.end_date <= $9)))
+ORDER BY f.id";0;0;0;0;0;0;5;10235.9504;1180.3759;2914.6154;2047.19008;730.6771079648095;272615;8627;231038;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+10;32871;t;3075921541462290673;"SELECT f.id AS Id, f.description AS Description, f.daily_price_per_person AS DailyPricePerPerson, f.capacity AS Capacity, b.id AS BuildingId, f.flat_number AS FlatNumber
+FROM rental.flats f
+JOIN rental.building b ON f.building_id = b.id
+WHERE f.daily_price_per_person <= $1
+AND f.capacity >= $2
+AND NOT EXISTS (
+    SELECT $3 FROM rental.reservations r
+    WHERE r.flat_id = f.id
+    AND (r.start_date, r.end_date) OVERLAPS ($4, $5)
+)
+ORDER BY f.id";0;0;0;0;0;0;5;17087.907199999998;2422.6735000000003;4554.460599999999;3417.58144;814.4307541939622;56790;186388;232857;0;0;0;0;0;0;58598;59652;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+10;32871;t;3851029712228439361;"SELECT t.name AS ""Amenity"", count(*)::int AS ""RentalCount""
+FROM rental.reservations AS r
+INNER JOIN rental.flats AS f ON r.flat_id = f.id
+INNER JOIN rental.building AS b ON f.building_id = b.id
+INNER JOIN rental.addresses AS a ON b.address_id = a.id
+INNER JOIN (
+    SELECT f1.name, f0.flat_id
+    FROM rental.flat_facility AS f0
+    INNER JOIN rental.facilities AS f1 ON f0.facility_id = f1.id
+) AS t ON f.id = t.flat_id
+WHERE a.city = $1
+GROUP BY t.name
+ORDER BY count(*)::int DESC";0;0;0;0;0;0;5;791.8870999999999;105.446;234.0735;158.37742;48.13487156760263;250;134070;19083;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+10;32871;t;-4818722781088261692;"SELECT fac.name AS Amenity, COUNT(*) AS RentalCount
+FROM rental.reservations r
+JOIN rental.flats f ON r.flat_id = f.id
+JOIN rental.building b ON f.building_id = b.id
+JOIN rental.addresses a ON b.address_id = a.id
+JOIN rental.flat_facility ff ON f.id = ff.flat_id
+JOIN rental.facilities fac ON ff.facility_id = fac.id
+WHERE a.city = $1
+GROUP BY fac.name
+ORDER BY RentalCount DESC";0;0;0;0;0;0;5;1491.2251;216.74550000000002;422.8793;298.24502;81.28432207518003;250;126149;27021;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+10;32871;t;-507885921649201663;"SELECT f.id AS ""Id"", (
+    SELECT COALESCE(sum(r0.total_cost), $1)
+    FROM rental.reservations AS r0
+    WHERE f.id = r0.flat_id AND r0.start_date >= $2 AND r0.end_date <= $3) AS ""TotalRevenue""
+FROM rental.flats AS f
+INNER JOIN rental.building AS b ON f.building_id = b.id
+WHERE b.owner_id = $4
+ORDER BY (
+    SELECT COALESCE(sum(r.total_cost), $5)
+    FROM rental.reservations AS r
+    WHERE f.id = r.flat_id AND r.start_date >= $6 AND r.end_date <= $7) DESC";0;0;0;0;0;0;5;5.3393;0.9274;1.1425;1.06786;0.07509749929258633;250;2635;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+10;32871;t;-6456960838080312881;"SELECT f.capacity AS ""Capacity"", (
+    SELECT count(*)::int
+    FROM rental.flats AS f1
+    INNER JOIN rental.reservations AS r1 ON f1.id = r1.flat_id
+    WHERE f.capacity = f1.capacity)::bigint AS ""NumberOfRentals"", COALESCE(sum((
+    SELECT COALESCE(sum(r2.total_cost), $1)
+    FROM rental.reservations AS r2
+    WHERE f.id = r2.flat_id)), $2) AS ""TotalRevenue""
+FROM rental.flats AS f
+GROUP BY f.capacity
+ORDER BY (
+    SELECT count(*)::int
+    FROM rental.flats AS f1
+    INNER JOIN rental.reservations AS r1 ON f1.id = r1.flat_id
+    WHERE f.capacity = f1.capacity)::bigint DESC, COALESCE(sum((
+    SELECT COALESCE(sum(r2.total_cost), 0)
+    FROM rental.reservations AS r2
+    WHERE f.id = r2.flat_id)), 0) DESC";0;0;0;0;0;0;5;463252.66370000003;88935.4527;97261.7508;92650.53274;2931.316123597077;50;30876822;9129358;0;0;0;0;0;0;23925;24062;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
